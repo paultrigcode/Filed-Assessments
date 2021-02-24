@@ -6,12 +6,37 @@ from rest_framework import viewsets, mixins
 from django.forms import model_to_dict
 from rest_framework import status
 from rest_framework.views import APIView
+from cerberus import Validator
+from django.core.exceptions import ObjectDoesNotExist
+
+
 
 
 
 
 
 class ArticleView(APIView):
+    schema1 = {
+        'name': {'type': 'string'},
+        'duration':{'type':'integer'},
+        'audioFileType':{'type':'string'}
+    }
+    schema2 = {
+        'name': {'type': 'string'},
+        'duration':{'type':'integer'},
+        'audioFileType':{'type':'string'},
+        'host':{'type':'string'},
+        'participant':{'type':'list','required': False}
+    }
+    schema3 = {
+        'title': {'type': 'string'},
+        'duration':{'type':'integer'},
+        'audioFileType':{'type':'string'},
+        'author':{'type':'string'},
+        'narrator':{'type':'string'}
+
+    }
+    
     def delete(self,request,pk,slug):
         print(slug)
         if slug == "Song":
@@ -29,14 +54,20 @@ class ArticleView(APIView):
             return Response({
                 "status": "success",
             })
-        else:
-             return Response({
-                "status": "error",
-            })
+        return Response({
+                "errors": "Invalid audioFileType"
+            }, status.HTTP_400_BAD_REQUEST)
+
 
     def post(self, request):
         file_type = request.data["audioFileType"]
         if file_type == "Song":
+            v = Validator(self.schema1)
+            v.require_all = True
+            if not v.validate(request.data):
+                return Response({
+                    "errors": v.errors
+                }, status.HTTP_400_BAD_REQUEST)
             name = request.data["name"]
             duration = request.data['duration']
             song = Song.objects.create(name = name,duration_in_number_of_seconds = duration)
@@ -46,6 +77,12 @@ class ArticleView(APIView):
             })
 
         elif file_type == "Podcast":
+            v = Validator(self.schema2)
+            v.require_all = True
+            if not v.validate(request.data):
+                return Response({
+                    "errors": v.errors
+                }, status.HTTP_400_BAD_REQUEST)
             name = request.data["name"]
             duration = request.data['duration']
             host = request.data['host']
@@ -60,6 +97,12 @@ class ArticleView(APIView):
                 "data": model_to_dict(podcast)
             })
         elif file_type == "Audiobook":
+            v = Validator(self.schema3)
+            v.require_all = True
+            if not v.validate(request.data):
+                return Response({
+                    "errors": v.errors
+                }, status.HTTP_400_BAD_REQUEST)
             title = request.data["title"]
             author = request.data["author"]
             narrator = request.data["narrator"]
@@ -72,7 +115,7 @@ class ArticleView(APIView):
 
         else:
              return Response({
-                "errors": "Invalid   audioFileType"
+                "errors": "Invalid   audioFileType. audioFileType can either be Song,Podcast or Audiobook "
             }, status.HTTP_400_BAD_REQUEST)
 
 
@@ -82,6 +125,10 @@ class ArticleView(APIView):
             name = request.data["name"]
             duration = request.data['duration']
             song = Song.objects.get(pk=pk)
+            if song.DoesNotExist():
+                return Response({
+                    "status": "error",
+                })    
             song.name = name
             song.duration =duration
             song.save()
@@ -98,6 +145,10 @@ class ArticleView(APIView):
             narrator = request.data["narrator"]
             duration = request.data['duration']
             audiobook = Audiobook.objects.get(pk=pk)
+            if audiobook.DoesNotExist():
+                return Response({
+                    "status": "error",
+                })    
             audiobook.title = title
             audiobook.author = author
             audiobook.narrator = narrator
@@ -115,6 +166,10 @@ class ArticleView(APIView):
             duration = request.data['duration']
             host = request.data['host']
             podcast = Podcast.objects.get(pk=pk)
+            if podcast.DoesNotExist():
+                return Response({
+                    "status": "error",
+                })    
             podcast.name = name
             podcast.duration =duration
             podcast.host = host
@@ -126,8 +181,9 @@ class ArticleView(APIView):
             })
         else:
             return Response({
-                "status": "error",
-            })
+                "errors": "Invalid   audioFileType. audioFileType can either be Song,Podcast or Audiobook "
+            }, status.HTTP_400_BAD_REQUEST)
+
 
     def get(self, request,slug):
         if slug == "Song":
@@ -143,46 +199,46 @@ class ArticleView(APIView):
             data = AudiobookSerializer(audiobook, many=True).data
             return Response(data)
         else:
-             return Response({
-                "status": "error",
-            })
+            return Response({
+                "errors": "Invalid  audioFileType"
+            }, status.HTTP_400_BAD_REQUEST)
+
 
     
 class ArticleDetail(APIView):
     def get(self, request,slug, pk):
         if slug == "Song":
-            song = Song.objects.get(pk =pk)
-            if song.DoesNotExist():
-                 return Response({
-                    "status": "error",
-                })            
-            else:
-                 
-                data = SongSerializer(song).data
-                return Response(data)
+            try:
+                song = Song.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Song with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            data = SongSerializer(song).data
+            return Response(data)
         elif slug == "Podcast":
-            podcast = Podcast.objects.get(pk = pk)
-            if song.DoesNotExist():
-                 return Response({
-                    "status": "error",
-                })    
-            else:
+            try:
+                podcast = Podcast.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Podcast with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
                 data = PodcastSerializer(podcast).data
                 return Response(data)
         elif slug == "Audiobook":
-            audiobook = Audiobook.objects.get(pk = pk)
-            if song.DoesNotExist():
-                 return Response({
-                    "status": "error",
-                })    
-            else:
+            try:
+                audiobook = Audiobook.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Audiobook with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
                 data = AudiobookSerializer(audiobook).data
                 return Response(data)
         else:
-             return Response({
-                "status": "error",
-            })
-
+           return Response({
+                "errors": "Invalid audioFileType. audioFileType can either be Song,Podcast or Audiobook "
+            }, status.HTTP_400_BAD_REQUEST)
 
 
 
