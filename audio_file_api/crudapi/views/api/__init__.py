@@ -1,0 +1,1 @@
+from crudapi.views.api.crud import *
