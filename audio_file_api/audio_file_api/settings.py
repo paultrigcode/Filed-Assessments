@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': os.getenv("DB_NAME"),                      # Or path to database file if using sqlite3.
         'USER': os.getenv("DB_USER", "root"),
         'PASSWORD': os.getenv("DB_PASS", "root"),
-        'HOST': os.getenv("DB_HOST", "0.0.0.0"),
+        'HOST': os.getenv("DB_HOST", "localhost"),
         'PORT': os.getenv("DB_PORT", "3306"),
     }
 }

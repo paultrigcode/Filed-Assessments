@@ -144,11 +144,13 @@ class AudioView(APIView):
                 return Response({
                     "errors": "Song with that id does not exists"
                 }, status.HTTP_500_INTERNAL_SERVER_ERROR)
-            song = Song.objects.get(pk=pk)
-            if song.DoesNotExist():
+            v = Validator(self.schema1)
+            v.require_all = True
+            if not v.validate(request.data):
                 return Response({
-                    "status": "error",
-                })    
+                    "errors": v.errors
+                }, status.HTTP_400_BAD_REQUEST)
+            song = Song.objects.get(pk=pk)
             song.name = name
             song.duration =duration
             song.save()
@@ -171,10 +173,6 @@ class AudioView(APIView):
                     "errors": "Audiobook with that id does not exists"
                 }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             audiobook = Audiobook.objects.get(pk=pk)
-            if audiobook.DoesNotExist():
-                return Response({
-                    "status": "error",
-                })    
             audiobook.title = title
             audiobook.author = author
             audiobook.narrator = narrator
@@ -191,6 +189,8 @@ class AudioView(APIView):
             name = request.data["name"]
             duration = request.data['duration']
             host = request.data['host']
+            if "participant" in request.data:
+                participant = request.data['participant']
             try:
                 podcast = Podcast.objects.get(pk =pk)
             except ObjectDoesNotExist:
@@ -198,13 +198,11 @@ class AudioView(APIView):
                     "errors": "Podcast with that id does not exists"
                 }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             podcast = Podcast.objects.get(pk=pk)
-            if podcast.DoesNotExist():
-                return Response({
-                    "status": "error",
-                })    
             podcast.name = name
             podcast.duration =duration
             podcast.host = host
+            if "participant" in request.data:
+                podcast.participant =participant
             podcast.save()
             return Response({
                 "status": "success",
