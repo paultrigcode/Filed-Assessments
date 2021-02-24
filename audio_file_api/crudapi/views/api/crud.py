@@ -10,12 +10,7 @@ from cerberus import Validator
 from django.core.exceptions import ObjectDoesNotExist
 
 
-
-
-
-
-
-class ArticleView(APIView):
+class AudioView(APIView):
     schema1 = {
         'name': {'type': 'string'},
         'duration':{'type':'integer'},
@@ -40,22 +35,41 @@ class ArticleView(APIView):
     def delete(self,request,pk,slug):
         print(slug)
         if slug == "Song":
+            try:
+                song = Song.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Song with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
             Song.objects.filter(id =pk).delete()
             return Response({
                 "status": "success",
             })
         elif slug == "Podcast":
+            try:
+                podcast = Podcast.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Podcast with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             Podcast.objects.filter(id =pk).delete()
             return Response({
                 "status": "success",
             })
         elif slug == "Audiobook":
+            try:
+                audiobook = Audiobook.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Audiobook with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             Audiobook.objects.filter(id =pk).delete()
             return Response({
                 "status": "success",
             })
         return Response({
-                "errors": "Invalid audioFileType"
+                "errors": "Invalid   audioFileType. audioFileType can either be Song,Podcast or Audiobook "
             }, status.HTTP_400_BAD_REQUEST)
 
 
@@ -124,6 +138,12 @@ class ArticleView(APIView):
             print(request.data)
             name = request.data["name"]
             duration = request.data['duration']
+            try:
+                song = Song.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Song with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             song = Song.objects.get(pk=pk)
             if song.DoesNotExist():
                 return Response({
@@ -144,6 +164,12 @@ class ArticleView(APIView):
             author = request.data["author"]
             narrator = request.data["narrator"]
             duration = request.data['duration']
+            try:
+                audiobook = Audiobook.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Audiobook with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             audiobook = Audiobook.objects.get(pk=pk)
             if audiobook.DoesNotExist():
                 return Response({
@@ -165,6 +191,12 @@ class ArticleView(APIView):
             name = request.data["name"]
             duration = request.data['duration']
             host = request.data['host']
+            try:
+                podcast = Podcast.objects.get(pk =pk)
+            except ObjectDoesNotExist:
+                return Response({
+                    "errors": "Podcast with that id does not exists"
+                }, status.HTTP_500_INTERNAL_SERVER_ERROR)
             podcast = Podcast.objects.get(pk=pk)
             if podcast.DoesNotExist():
                 return Response({
@@ -205,7 +237,7 @@ class ArticleView(APIView):
 
 
     
-class ArticleDetail(APIView):
+class AudioDetail(APIView):
     def get(self, request,slug, pk):
         if slug == "Song":
             try:
@@ -239,15 +271,3 @@ class ArticleDetail(APIView):
            return Response({
                 "errors": "Invalid audioFileType. audioFileType can either be Song,Podcast or Audiobook "
             }, status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-        
-
-
-
-
-
-

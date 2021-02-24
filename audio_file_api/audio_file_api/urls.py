@@ -17,34 +17,19 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from django.urls import re_path, include
-from crudapi.views.api.crud import ArticleView,ArticleDetail
-
-
-# from crudapi.views import api
+from crudapi.views.api.crud import AudioView,AudioDetail
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
-
-# router = DefaultRouter()
-# router.register(r'audiofile', api.ApiViewSet,basename='audiofile')
-# router.register(r'song/<int:pk>/', api.DeleteViewSet,basename='audio')
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # re_path(r'^api/', include(router.urls)),
-    path('create/', ArticleView.as_view()),
-    path('<slug:slug>/<int:pk>', ArticleView.as_view()),
-    path('<slug:slug>/', ArticleView.as_view()),
-    path('asd/<slug:slug>/<int:pk>', ArticleDetail.as_view())
-
-
-
+    path('create/', AudioView.as_view()),
+    path('<slug:slug>/<int:pk>', AudioView.as_view()),
+    path('<slug:slug>/', AudioView.as_view()),
+    path('asd/<slug:slug>/<int:pk>', AudioDetail.as_view())
 
 ]
-
-
