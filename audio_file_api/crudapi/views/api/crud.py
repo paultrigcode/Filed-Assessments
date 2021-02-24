@@ -152,7 +152,7 @@ class AudioView(APIView):
             duration = request.data['duration']
             song = Song.objects.get(pk=pk)
             song.name = name
-            song.duration =duration
+            song.duration_in_number_of_seconds =duration
             song.save()
             return Response({
                 "status": "success",
@@ -181,7 +181,7 @@ class AudioView(APIView):
             audiobook.title = title
             audiobook.author = author
             audiobook.narrator = narrator
-            audiobook.duration = duration
+            audiobook.duration_in_number_of_seconds= duration
             audiobook.save()
             return Response({
                 "status": "success",
@@ -209,7 +209,7 @@ class AudioView(APIView):
                 participant = request.data['participant']
             podcast = Podcast.objects.get(pk=pk)
             podcast.name = name
-            podcast.duration =duration
+            podcast.duration_in_number_of_seconds =duration
             podcast.host = host
             if "participant" in request.data:
                 podcast.participant =participant
