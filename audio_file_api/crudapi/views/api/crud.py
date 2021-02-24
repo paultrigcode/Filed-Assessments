@@ -121,7 +121,7 @@ class AudioView(APIView):
             author = request.data["author"]
             narrator = request.data["narrator"]
             duration = request.data['duration']
-            audiobook = Audiobook.objects.create(title = titlr,duration_in_number_of_seconds = duration, author = author,narrator = narrator)
+            audiobook = Audiobook.objects.create(title = title,duration_in_number_of_seconds = duration, author = author,narrator = narrator)
             return Response({
                 "status": "success",
                 "data": model_to_dict(audiobook)
@@ -136,8 +136,6 @@ class AudioView(APIView):
     def put(self,request,slug,pk):
         if slug == "Song":
             print(request.data)
-            name = request.data["name"]
-            duration = request.data['duration']
             try:
                 song = Song.objects.get(pk =pk)
             except ObjectDoesNotExist:
@@ -150,6 +148,8 @@ class AudioView(APIView):
                 return Response({
                     "errors": v.errors
                 }, status.HTTP_400_BAD_REQUEST)
+            name = request.data["name"]
+            duration = request.data['duration']
             song = Song.objects.get(pk=pk)
             song.name = name
             song.duration =duration
@@ -161,17 +161,22 @@ class AudioView(APIView):
             })
 
         elif slug == "Audiobook":
-            print(request.data)
-            title = request.data["title"]
-            author = request.data["author"]
-            narrator = request.data["narrator"]
-            duration = request.data['duration']
             try:
                 audiobook = Audiobook.objects.get(pk =pk)
             except ObjectDoesNotExist:
                 return Response({
                     "errors": "Audiobook with that id does not exists"
                 }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            v = Validator(self.schema3)
+            v.require_all = True
+            if not v.validate(request.data):
+                return Response({
+                    "errors": v.errors
+                }, status.HTTP_400_BAD_REQUEST)
+            title = request.data["title"]
+            author = request.data["author"]
+            narrator = request.data["narrator"]
+            duration = request.data['duration']
             audiobook = Audiobook.objects.get(pk=pk)
             audiobook.title = title
             audiobook.author = author
@@ -180,23 +185,28 @@ class AudioView(APIView):
             audiobook.save()
             return Response({
                 "status": "success",
-                "data": model_to_dict(podcast)
+                "data": model_to_dict(audiobook)
 
             })
 
         elif slug == "Podcast":
-            print(request.data)
-            name = request.data["name"]
-            duration = request.data['duration']
-            host = request.data['host']
-            if "participant" in request.data:
-                participant = request.data['participant']
             try:
                 podcast = Podcast.objects.get(pk =pk)
             except ObjectDoesNotExist:
                 return Response({
                     "errors": "Podcast with that id does not exists"
                 }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            v = Validator(self.schema2)
+            v.require_all = True
+            if not v.validate(request.data):
+                return Response({
+                    "errors": v.errors
+                }, status.HTTP_400_BAD_REQUEST)
+            name = request.data["name"]
+            duration = request.data['duration']
+            host = request.data['host']
+            if "participant" in request.data:
+                participant = request.data['participant']
             podcast = Podcast.objects.get(pk=pk)
             podcast.name = name
             podcast.duration =duration
