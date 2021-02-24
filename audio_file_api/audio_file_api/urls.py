@@ -30,6 +30,6 @@ urlpatterns = [
     path('create/', AudioView.as_view()),
     path('<slug:slug>/<int:pk>', AudioView.as_view()),
     path('<slug:slug>/', AudioView.as_view()),
-    path('asd/<slug:slug>/<int:pk>', AudioDetail.as_view())
+    path('detail/<slug:slug>/<int:pk>', AudioDetail.as_view())
 
 ]
