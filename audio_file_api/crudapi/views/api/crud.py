@@ -33,7 +33,6 @@ class AudioView(APIView):
     }
     
     def delete(self,request,pk,slug):
-        print(slug)
         if slug == "Song":
             try:
                 song = Song.objects.get(pk =pk)
